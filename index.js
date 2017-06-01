@@ -10,6 +10,14 @@ app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+app.get('/times', function(request, response) {
+    var result = ''
+    var times = process.env.TIMES || 5
+    for (i=0; i < times; i++)
+      result += i + ' ';
+  response.send(result);
+});
+
 app.get('/', function(request, response) {
   response.render('pages/index');
 });
