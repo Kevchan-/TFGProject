@@ -2,10 +2,14 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var uuid = require('uuid');
+var fs = require('fs');
+var verbose = true;
 
 app.set('port', (process.env.PORT || 5000));
 
-app.use(express.static('/public'));
+app.use(express.static(__dirname +'/public'));
+app.use(express.static(__dirname +'/source'));
 
 // views is directory for all template files
 app.set('views', './views');
@@ -13,10 +17,28 @@ app.set('view engine', 'ejs');
 
 
 app.get('/', function(request, response){
+/*	if(verbose){
+		var file = request.params[0];
+		console.log('Express :: file requested : '+file);
+	}*/
+
 	response.render('pages/index');
 });
 
+/*app.get('/three.js', function(request, response){
+	response.sendFile(path.join(__dirname,'source', 'three.min.js'));
+});/*
+
 io.on('connection', function(socket){
+	socket.userid = uuid();
+	socket.emit('onconnected', {id: socket.userid});
+
+	console.log('socket.io:: player connected ' + socket.userid );
+
+	socket.on('disconnect', function(){
+		console.log('socket.io:: player disconnected ' + socket.userid );
+	});
+
 	socket.on('chat message', function(msg){
 		io.emit('chat message', msg);
 	});
