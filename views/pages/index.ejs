@@ -15,18 +15,16 @@
   </head>
 
   <body>
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
-
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/three.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+    <script src="/three.min.js">  </script>
+    <script src="/Box2d.min.js">  </script>
+
+    <script src="/player.js">     </script>
+    <script src="/gamecore.js">   </script>
+    <script src="/client.js">     </script>
 
     <script>
-      $(function () {
-        var socket = io();
 /*      $('form').submit(function(){
           socket.emit('chat message', $('#m').val());
           $('#m').val('');
@@ -36,10 +34,8 @@
           $('#messages').append($('<li>').text(msg));
         });
 */
-        socket.on('onconnected', function(data){
-          console.log('Connected succesfully to the socket.io server. Your server id is : '+data.id);
-        });
-      });
+
+        
     </script>
 
   </body>

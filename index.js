@@ -3,7 +3,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var uuid = require('uuid');
-var fs = require('fs');
+var box2D = require("box2dweb");
 var verbose = true;
 
 app.set('port', (process.env.PORT || 5000));
@@ -27,13 +27,20 @@ app.get('/', function(request, response){
 
 /*app.get('/three.js', function(request, response){
 	response.sendFile(path.join(__dirname,'source', 'three.min.js'));
-});/*
+});*/
+var gameserverCode = require('./source/gameserver.js').server;
+var gameServer;
 
 io.on('connection', function(socket){
 	socket.userid = uuid();
-	socket.emit('onconnected', {id: socket.userid});
-
+	socket.emit('onConnected', {id: socket.userid});
+	
 	console.log('socket.io:: player connected ' + socket.userid );
+
+	if(gameServer == null){
+		gameServer = new gameserverCode();
+	}
+	gameServer.FindGameRoom(socket);
 
 	socket.on('disconnect', function(){
 		console.log('socket.io:: player disconnected ' + socket.userid );
@@ -41,6 +48,10 @@ io.on('connection', function(socket){
 
 	socket.on('chat message', function(msg){
 		io.emit('chat message', msg);
+	});
+
+	socket.on('message', function(message){
+		gameServer.OnMessage(socket, message);
 	});
 });
 
