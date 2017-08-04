@@ -35,7 +35,7 @@ io.on('connection', function(socket){
 	socket.userid = uuid();
 	socket.emit('onConnected', {id: socket.userid});
 	
-	console.log('socket.io:: player connected ' + socket.userid );
+	console.log('socket.io:: player connected ' + socket.userid);
 
 	if(gameServer == null){
 		gameServer = new gameserverCode();
@@ -52,6 +52,11 @@ io.on('connection', function(socket){
 
 	socket.on('message', function(message){
 		gameServer.OnMessage(socket, message);
+	});
+
+	socket.on('disconnect', function(){
+		io.emit('onDisconnected', socket.userid);
+		gameServer.OnDisconnection(socket);
 	});
 });
 
