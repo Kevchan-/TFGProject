@@ -67,7 +67,7 @@ function GameCore(gameRoom){
 				this.ServerUpdate();
 			}
 			else{
-				this.selfPlayer.Move(0.1, 0, this.deltaTime);
+//				this.selfPlayer.Move(0.1, 0, this.deltaTime);
 				this.ClientUpdate();
 				Render();
 			}
@@ -224,7 +224,7 @@ function GameCore(gameRoom){
 
 		this.serverUpdates.push(data);
 
-		console.log(data);
+//		console.log(data);
 		for(var playerid in this.players){
 			if(this.players.hasOwnProperty(playerid)){
 
