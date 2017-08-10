@@ -1,8 +1,9 @@
 var playerCode = {};
 
 var frame_time = 60/1000; // run the local game at 16ms/ 60hz
+
 if('undefined' != typeof(global)){
- 	frame_time = 45; //on server we run at 45ms, 22hz	
+ 	frame_time = 45; //on server we run at 45ms, 22hz
 	playerCode = require('./player.js').player;
 }
 
@@ -47,12 +48,17 @@ function GameCore(gameRoom){
 
 		this.deltaTime	= 0.016;
 		this.fps		= 0;		//this is (1/this.deltaTime)
+		this.update_Time = 0.000;
 
 		this.lit = 0;
 		this.lit = new Date().getTime();
 	}
 
 	this.Update = function(time){
+
+		if(typeof(time) == "undefined"){
+			time = Date.now();
+		}
 
 		if(this.lastFrameTime){
 			this.deltaTime = (time - this.lastFrameTime)/1000.0;
@@ -74,9 +80,9 @@ function GameCore(gameRoom){
 		}
 		
 		if(this.server){
-			this.animationFrame = setImmediate(this.Update.bind(this));
+			this.animationFrame = setTimeout(this.Update.bind(this), frame_time);
 		}else{
-			this.animationFrame = requestAnimationFrame(this.Update.bind(this));	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			
+			this.animationFrame = window.requestAnimationFrame(this.Update.bind(this), this.viewport);	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			
 		}			
 	}
 
@@ -225,10 +231,23 @@ function GameCore(gameRoom){
 		this.serverUpdates.push(data);
 
 //		console.log(data);
-		for(var playerid in this.players){
-			if(this.players.hasOwnProperty(playerid)){
 
+		var index = this.selfPlayer.id+".pos";
+		this.selfPlayer.SetPos(data[index].x, data[index].y);
+
+		this.previousSelfPos = data[this.selfPlayer.id+'.pos'];
+		if(this.previousSelfPos.x != data[this.selfPlayer.id+'.pos'].x || this.previousSelfPos.y != data[this.selfPlayer.id+'.pos'].y)
+			console.log("This player pos: "+data[this.selfPlayer.id+'.pos']);
+		
+		console.log(data[this.selfPlayer.id+'.pos']);
+
+		for(var playerId in this.players){
+			if(this.players.hasOwnProperty(playerId)){
+				index = playerId+".pos";
+//				console.log("INDEX: "+index);
+				this.players[playerId].SetPos(data[index].x, data[index].y);
 			}
+			else continue;
 		}
 	}
 
@@ -272,6 +291,8 @@ function GameCore(gameRoom){
 		}
 
 		if(input.length>0){
+			this.inputSequence += 1;
+
 			this.selfPlayer.inputs.push({
 				inputs 	: input,
 				time 	: this.localTime.toFixed(3),
@@ -320,8 +341,8 @@ function GameCore(gameRoom){
 
 	this.MovementVectorFromDirection = function(x, y){
 	    return {
-	        x : (x * (this.playerSpeed * 0.015)).toFixed(3),
-	        y : (y * (this.playerSpeed * 0.015)).toFixed(3)
+	        x : parseFloat((x * (this.playerSpeed * 0.015)).toFixed(3)),
+	        y : parseFloat((y * (this.playerSpeed * 0.015)).toFixed(3))
 	    };
 	}
 
@@ -330,6 +351,7 @@ function GameCore(gameRoom){
 		var yDir = 0;
 
 		if(player.inputs.length > 0){
+//			console.log(player.inputs);
 			for(var i = 0; i < player.inputs.length; i++){
 				if(player.inputs[i].seq <= player.lastInputSeq) continue;
 
@@ -340,19 +362,17 @@ function GameCore(gameRoom){
 					var key = input[j];
 					switch(key){
 						case "l":
-							xDir -= 1;
+							xDir = -1;
 							break;
 						case "r":
-							xDir += 1;
+							xDir = 1;
 							break;
 						case "d":
-							yDir += 1;
+							yDir = -1;
 							break;
 						case "u":
-							yDir -= 1;
+							yDir = 1;
 							break;
-						default:
-							console.log("Warning: invalid character");
 					}
 				}
 			}
@@ -361,10 +381,9 @@ function GameCore(gameRoom){
 		var	direction = this.MovementVectorFromDirection(xDir, yDir);
 
 		if(player.inputs.length > 0){
-			player.lastInputSeq = player.inputs[player.inputs.length-1].sequence;	//time of the last 
-			player.lastInputTime = player.inputs[player.inputs.length-1].time;
+			player.lastInputSeq = player.inputs[player.inputs.length-1].sequence;	//last sequence on array
+			player.lastInputTime = player.inputs[player.inputs.length-1].time;	//time of the last sequence
 		}
-
 		return (direction);
 	}
 
@@ -382,11 +401,14 @@ function GameCore(gameRoom){
 				playerOldPos.y = playerPos.y;
 
 				var newDir = this.ProcessInput(this.players[playerId]);
-				playerPos.x = parseFloat(parseFloat(playerPos.x + newDir.x).toFixed(3));
-				playerPos.y = parseFloat(parseFloat(playerPos.y + newDir.y).toFixed(3));
 
+				playerPos.x = this.players[playerId].pos.x + newDir.x;
+				playerPos.y = this.players[playerId].pos.y + newDir.y;
+
+				console.log("pos: "+playerPos.x.toFixed(3)+", "+playerPos.y.toFixed(3)+", Dir: "+newDir.x+", "+newDir.y);
 				this.players[playerId].inputs = [];
 			}
+			else continue;
 		}
 	}
 
@@ -409,38 +431,35 @@ function GameCore(gameRoom){
 
 		for(var playerId in this.players){
 			if(this.players.hasOwnProperty(playerId)){
-				if(!this.players[playerId].host){
-					state["player"+playerCounter.toString()+"Pos"] = this.players[playerId].pos;
-					state["player"+playerCounter.toString()+"InputSeq"] = this.players[playerId].lastInputSeq;
-				}
-				playerCounter++;
+				state[playerId+".pos"] = this.players[playerId].pos;
+				state[playerId+".inputSeq"] = this.players[playerId].lastInputSeq;
 			}
+			else continue;
 		}
 
-		state["hostPos"] = this.host.pos;
-		state["hostInputSeq"] = this.host.lastInputSeq;
 		state["time"] = this.serverTime;
 
 		this.lastState = state;
 
-		console.log(this.lastState);
-
-		this.host.instance.emit('onServerUpdate', this.lastState);
-		
 		for(var playerId in this.players){
 			if(this.players.hasOwnProperty(playerId)){
 				this.players[playerId].instance.emit('onServerUpdate', this.lastState);
 			}
+			else continue;
 		}
-		console.log("__________________________________________");
+//		console.log("__________________________________________");
 	}
 
 	this.ServerInputHandler = function(client, inputCommands, inputTime, inputSequence){
-		var playerClient = null;
+		var playerClient = null; 
+		if(client.host){
+			playerClient = this.host;
+		}else{
+			playerClient = this.players[client.userid];			
+		}
 
-		playerClient = this.players[client.userid];
+	//	console.log("Player id "+playerClient.instance.userid+" sended "+inputCommands);
 
-		console.log("Player input id "+playerClient.instance.userid);
 		playerClient.inputs.push({
 			inputs 	: inputCommands,
 			time 	: inputTime,
@@ -470,7 +489,7 @@ function GameCore(gameRoom){
 		this.playerCount++;
 	}
 
-	this.playerSpeed = 120;
+	this.playerSpeed = 15;
 
 	//timers for physics
 	this.physicsDeltaTime = 0.0001;
@@ -490,12 +509,13 @@ function GameCore(gameRoom){
 		this.lastState = {};
 	}
 	else{
-		this.keyboard = new THREEx.KeyboardState();
 		this.AddPlayer(null);
+
+		this.keyboard = new THREEx.KeyboardState();
 		this.ClientCreateConfiguration();
-		this.serverUpdates = [];
 		this.ClientConnectToServer();
 		this.ClientCreatePingTimer();
+		this.serverUpdates = [];
 	}
 }
 

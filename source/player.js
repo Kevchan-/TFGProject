@@ -32,6 +32,17 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 	this.inputs = [];
 	this.lastInputSeq = {};
 
+	this.SetPos = function(x, y){
+		this.pos.x = x;
+		this.pos.y = y;
+		if(typeof(this.model.position) != "undefined" ){
+			this.model.position.x = this.pos.x;
+			this.model.position.y = this.pos.y;
+		}else{
+			console.log("no model loaded");
+		}
+	}
+
 	this.Move = function(x,y, deltaTime){	//moves by this quantity
 		this.pos.x += x;
 		this.pos.y += y;

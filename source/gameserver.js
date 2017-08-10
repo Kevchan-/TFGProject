@@ -69,13 +69,15 @@ function GameServer(){
 						if(room.playerClients[playerid]){
 								newHost = true;
 								room.playerHost = room.playerClients[playerid];
+								room.game.host = room.game.players[playerid];
+								room.game.host.instance = room.playerClients[playerid];
 								delete room.playerClients[playerid];
 								console.log("NEW HOST: "+room.playerHost.userid);
 						}
 					}
 				}
 				else{
-					break;
+					continue;
 				}
 			}
 //now we have the new host, so we notify them
@@ -129,6 +131,7 @@ function GameServer(){
 					}
 				}
 			}
+			else continue;
 		}
 		console.log("id array of "+counter+" ids: "+existingIds);
 		client.send('j.'+existingIds);	//informing the player itself it joined and send them the existing players
@@ -141,14 +144,12 @@ function GameServer(){
 		console.log("________________________");
 		if(this.gameCount >0){
 			var joined = false;
-			//console.log(this.games);
 			for(var gameid in this.games){
 				if(this.games.hasOwnProperty(gameid)){
 					if(this.games[gameid]){
 						console.log("room id: "+this.games[gameid].id);
 						var room = this.games[gameid];
 						joined = true;
-						//console.log("client clients: "+room.playerClients);
 						room.AddPlayer(client);
 						if(this.games[gameid].playerCount == 2){ //the game starts when a second player enters, next joining players will enter with the game started
 							this.StartGame(this.games[gameid]);	
@@ -159,6 +160,7 @@ function GameServer(){
 					}
 				}
 				else continue;
+
 			}
 			if(!joined){
 				this.CreateGameRoom(client);
