@@ -7,6 +7,12 @@ if('undefined' != typeof(global)){
 	playerCode = require('./player.js').player;
 }
 
+Number.prototype.fixed = function(n) { n = n || 3; return parseFloat(this.toFixed(n)); };
+GameCore.prototype.lerp = function(p, n, t) { var _t = Number(t); _t = (Math.max(0, Math.min(1, _t))).fixed(); return (p + _t * (n - p)).fixed(); };
+    //Simple linear interpolation between 2 vectors
+GameCore.prototype.v_lerp = function(v,tv,t) { return { x: this.lerp(v.x, tv.x, t), y:this.lerp(v.y, tv.y, t) }; };
+
+
 function GameCore(gameRoom){
 	//if gameRoom is null it means it's not being called from server, rather from client
 	this.room = gameRoom;
@@ -28,9 +34,12 @@ function GameCore(gameRoom){
 	console.log("Server: "+this.server);
 
 	this.ClientCreateConfiguration = function(){
-		this.clientPrediction 	= true;
+		this.naiveApproach = false;
+		this.clientPrediction 	= false;
 		this.inputSequence 		= 0;
 		this.clientSmoothing 	= true;
+		this.clientSmooth 		= 25;
+
 
 		this.netPing 		= 0.001;	//travel time for a packet to the server and back to the client
 		this.netLatency		= 0.001;	//latency between client and server (ping/2)
@@ -223,33 +232,6 @@ function GameCore(gameRoom){
 		console.log("players in the array:"+Object.keys(this.players).length);
 	}
 
-	this.ClientOnServerUpdate = function(data){
-
-		this.serverTime = data.time;
-		this.clientTime = this.serverTime - (this.net_offset/1000);
-
-		this.serverUpdates.push(data);
-
-//		console.log(data);
-
-		var index = this.selfPlayer.id+".pos";
-		this.selfPlayer.SetPos(data[index].x, data[index].y);
-
-		this.previousSelfPos = data[this.selfPlayer.id+'.pos'];
-		if(this.previousSelfPos.x != data[this.selfPlayer.id+'.pos'].x || this.previousSelfPos.y != data[this.selfPlayer.id+'.pos'].y)
-			console.log("This player pos: "+data[this.selfPlayer.id+'.pos']);
-		
-		console.log(data[this.selfPlayer.id+'.pos']);
-
-		for(var playerId in this.players){
-			if(this.players.hasOwnProperty(playerId)){
-				index = playerId+".pos";
-//				console.log("INDEX: "+index);
-				this.players[playerId].SetPos(data[index].x, data[index].y);
-			}
-			else continue;
-		}
-	}
 
 	this.ClientConnectToServer = function(){
 		this.socket = io();	//this is what trigers the connection event on the server and the connect event coming next here
@@ -311,8 +293,76 @@ function GameCore(gameRoom){
 		}
 	}
 
-	this.ClientUpdatePosition = function(){
+	this.ClientProcessNetUpdates = function(){
+		if(this.serverUpdates.length > 0){
+			var currentTime = this.clientTime;
+			var target = null;
+			var previous = null;
 
+			for(var i = 0; i<this.serverUpdates.length; ++i){
+				var point = this.serverUpdates[i];
+				var nextPoint = this.serverUpdates[i+1];
+	
+/*				console.log(point["time"]+" n update time");
+				console.log(this.clientTime+" clientTime");
+				console.log(nextPoint["time"]+" n+1 update time");*/
+	
+				//compare our time with the server times
+				if(currentTime > point["time"] && currentTime < nextPoint["time"]){
+					target = nextPoint;
+					previous = point;
+//					console.log("target & previous positions found");
+					break;
+				}
+			}
+/*			console.log(this.serverUpdates[0].time+" oldest update time");
+			console.log(this.clientTime+" clientTime");
+			console.log(this.serverUpdates[this.serverUpdates.length-1].time+" newest update time");
+*/
+			if(target && previous){
+				this.targetTime = target.time;
+
+				var difference = this.targetTime - currentTime;
+				var maxDifference = parseFloat((target.time - previous.time).toFixed(3));
+				var timePoint = parseFloat((difference/maxDifference).toFixed(3));	//value/target will give us the 0 to 1 range we need for lerp
+
+				var latestServerUpdate = this.serverUpdates[this.serverUpdates.length-1];
+
+				if(this.clientSmoothing){
+					for(var playerId in this.players){
+						if(this.players.hasOwnProperty(playerId)){
+							if (this.players[playerId].id !== this.selfPlayer.id) {//updating only others
+								var serverPos 	= latestServerUpdate[playerId+".pos"];
+								var targetPos 	= target[playerId+".pos"];
+								var pastPos 	= previous[playerId+".pos"];
+
+								var otherPosition = this.v_lerp(pastPos, targetPos, timePoint);
+								var finalOtherPosition = this.v_lerp(this.players[playerId].pos, otherPosition, this.physicsDeltaTime*this.clientSmooth);
+								console.log("Player "+playerId+" position: "+finalOtherPosition.x+", "+finalOtherPosition.y);
+								this.players[playerId].SetPos(finalOtherPosition.x, finalOtherPosition.y);
+							}
+						}else continue;
+					}
+				}
+
+				if(!this.clientPrediction && !this.naiveApproach){
+					var myServerPosition = latestServerUpdate[this.selfPlayer.id+".pos"];
+					var myTargetPosition = target[this.selfPlayer.id+".pos"];
+					var myPastPosition = previous[this.selfPlayer.id+".pos"];
+
+					var localTarget = this.v_lerp(myPastPosition, myTargetPosition, timePoint);
+
+					if(this.clientSmoothing){
+						var finalPosition = this.v_lerp(this.selfPlayer.pos, localTarget, this.physicsDeltaTime*this.clientSmooth);
+						this.selfPlayer.SetPos(finalPosition.x, finalPosition.y);
+					}
+				}
+			}
+		}
+	}
+
+	this.ClientUpdatePosition = function(){
+		this.ClientProcessNetUpdates();
 	}
 
 	this.ClientUpdateOthersPosition = function(){
@@ -331,6 +381,43 @@ function GameCore(gameRoom){
 			this.fpsAverageAccumulator = this.fps;
 		}
 	}
+
+	this.ClientOnServerUpdate = function(data){
+
+		this.serverTime = data.time;
+		this.clientTime = this.serverTime - (this.netOffset/1000);
+
+		this.serverUpdates.push(data);
+
+		//limit for the updates (in seconds). 60fps*seconds = number of samples
+		if(this.serverUpdates.length /*one srvrupdate per frame*/>= (60*this.bufferSize)){
+			this.serverUpdates.splice(0, 1); 	//we delete the oldest one
+		}
+
+		//if clientTime gets behind the time when the last tick happened, a snap occurs to the last tick
+		this.oldestTick = this.serverUpdates[0].time;
+		this.ClientProcessNetUpdates();
+
+//		console.log(data);
+		if(this.naiveApproach){
+			
+				var index = this.selfPlayer.id+".pos";
+				this.selfPlayer.SetPos(data[index].x, data[index].y);
+
+		//		console.log(data[this.selfPlayer.id+'.pos']);
+
+				for(var playerId in this.players){
+					if(this.players.hasOwnProperty(playerId)){
+						index = playerId+".pos";
+		//				console.log("INDEX: "+index);
+						this.players[playerId].SetPos(data[index].x, data[index].y);
+					}
+					else continue;
+				}
+		}
+	}
+
+
 
 	this.ClientUpdate = function(){
 		this.ClientInputHandler();
@@ -405,7 +492,7 @@ function GameCore(gameRoom){
 				playerPos.x = this.players[playerId].pos.x + newDir.x;
 				playerPos.y = this.players[playerId].pos.y + newDir.y;
 
-				console.log("pos: "+playerPos.x.toFixed(3)+", "+playerPos.y.toFixed(3)+", Dir: "+newDir.x+", "+newDir.y);
+//				console.log("pos: "+playerPos.x.toFixed(3)+", "+playerPos.y.toFixed(3)+", Dir: "+newDir.x+", "+newDir.y);
 				this.players[playerId].inputs = [];
 			}
 			else continue;
