@@ -135,7 +135,7 @@ function GameServer(){
 		}
 		console.log("id array of "+counter+" ids: "+existingIds);
 		client.send('j.'+existingIds);	//informing the player itself it joined and send them the existing players
-		client.send('s');
+		client.send('s.'+String(gameRoom.game.localTime).replace('.','-'));
 	}
 
 
