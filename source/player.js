@@ -26,13 +26,13 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 	this.state = 'not-connected';
 	this.oldState = 		{pos:{x : 0, y : 0}};
 	this.currentState = 	{pos:{x : 0, y : 0}};
-	this.state_time = 	new Date().getTime();
+	this.stateTime = 	new Date().getTime();
 
 	//log of inputs for network
 	this.inputs = [];
 	this.lastInputSeq = {};
 
-	this.SetPos = function(x, y){
+	this.SetPos = function(x, y){	//use this function to move every object on the client
 		this.pos.x = x;
 		this.pos.y = y;
 		if(typeof(this.model.position) != "undefined" ){
@@ -41,6 +41,8 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 		}else{
 			console.log("no model loaded");
 		}
+
+//		console.log("pos: "+this.pos.x+", "+this.pos.y);
 	}
 
 	this.Move = function(x,y, deltaTime){	//moves by this quantity
