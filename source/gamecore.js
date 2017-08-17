@@ -135,6 +135,15 @@ function GameCore(gameRoom){
 			this.selfPlayer.currentState.pos.y = this.selfPlayer.currentState.pos.y + movement.y;
 
 			this.selfPlayer.stateTime = this.localTime;
+		}else{
+			this.selfPlayer.oldState.pos.x = this.selfPlayer.currentState.pos.x;
+			this.selfPlayer.oldState.pos.y = this.selfPlayer.currentState.pos.y;
+			var movement = this.ProcessInput(this.selfPlayer);
+//			console.log(message+"input: "+movement.x.toFixed(2)+", "+movement.y.toFixed(2));
+			this.selfPlayer.currentState.pos.x = this.selfPlayer.currentState.pos.x + movement.x;
+			this.selfPlayer.currentState.pos.y = this.selfPlayer.currentState.pos.y + movement.y;
+
+			this.selfPlayer.stateTime = this.localTime;			
 		}
 	}
 
@@ -371,7 +380,15 @@ function GameCore(gameRoom){
 					}
 				}
 
-				if(!this.clientPrediction && !this.naiveApproach){
+				if(!this.clientPrediction){
+
+					this.ClientUpdatePhysics();
+					this.ClientUpdateLocalPosition();
+				}
+
+/*				if(!this.clientPrediction && !this.naiveApproach){
+					console.log("using net only");
+
 					var myServerPosition = latestServerUpdate[this.selfPlayer.id+".pos"];
 					var myTargetPosition = target[this.selfPlayer.id+".pos"];
 					var myPastPosition = previous[this.selfPlayer.id+".pos"];
@@ -384,7 +401,7 @@ function GameCore(gameRoom){
 					}
 				}else{
 //					console.log("2 is ok");
-				}
+				}*/
 			}
 		}
 	}
@@ -399,6 +416,10 @@ function GameCore(gameRoom){
 		if(this.clientPrediction){
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
+		}else{
+			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
+			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
+
 		}
 	}
 
@@ -495,7 +516,12 @@ function GameCore(gameRoom){
 
 			//if clientTime gets behind the time when the last tick happened, a snap occurs to the last tick
 			this.oldestTick = this.serverUpdates[0].time;
-			this.ClientNetPredictionCorrection();
+
+			if(this.clientPrediction){
+				this.ClientNetPredictionCorrection();
+			}else{
+
+			}
 
 	//		console.log(data);
 		}
