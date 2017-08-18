@@ -415,7 +415,9 @@ function GameCore(gameRoom){
 		}
 		if(this.clientPrediction){
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
-			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
+			var destination = this.v_lerp(this.selfPlayer.pos, this.selfPlayer.currentState.pos, this.clientSmooth*this.physicsDeltaTime);
+//			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
+			this.selfPlayer.SetPos(destination.x, destination.y); 
 		}else{
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
