@@ -322,7 +322,7 @@ function GameCore(gameRoom){
 			var target = null;
 			var previous = null;
 
-			for(var i = 0; i<this.serverUpdates.length; ++i){
+			for(var i = 0; i<this.serverUpdates.length; i++){
 				var point = this.serverUpdates[i];
 				var nextPoint = this.serverUpdates[i+1];
 	
@@ -380,13 +380,13 @@ function GameCore(gameRoom){
 					}
 				}
 
-				if(!this.clientPrediction){
+/*				if(!this.clientPrediction){
 
 					this.ClientUpdatePhysics();
 					this.ClientUpdateLocalPosition();
-				}
+				}*/
 
-/*				if(!this.clientPrediction && !this.naiveApproach){
+				if(!this.clientPrediction && !this.naiveApproach){
 					console.log("using net only");
 
 					var myServerPosition = latestServerUpdate[this.selfPlayer.id+".pos"];
@@ -401,7 +401,7 @@ function GameCore(gameRoom){
 					}
 				}else{
 //					console.log("2 is ok");
-				}*/
+				}
 			}
 		}
 	}
