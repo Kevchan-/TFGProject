@@ -90,7 +90,8 @@ function GameCore(gameRoom){
 		if(this.server){
 			this.animationFrame = setTimeout(this.Update.bind(this), frame_time);
 		}else{
-			this.animationFrame = window.requestAnimationFrame(this.Update.bind(this), this.viewport);	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			
+			this.animationFrame = window.setTimeout(this.Update.bind(this), frame_time);
+//			this.animationFrame = window.requestAnimationFrame(this.Update.bind(this), this.viewport);	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			
 		}			
 	}
 
