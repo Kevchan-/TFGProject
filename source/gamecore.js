@@ -6,6 +6,34 @@ if('undefined' != typeof(global)){
  	frame_time = 45; //on server we run at 45ms, 22hz
 	playerCode = require('./player.js').player;
 }
+else
+{
+    var lastTime = 0;
+    var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+
+    for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++ x ) {
+        window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+        window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
+    }
+
+    if ( !window.requestAnimationFrame ) {
+        window.requestAnimationFrame = function ( callback, element ) {
+//        	console.log("ok");
+            var currTime = Date.now(), timeToCall = Math.max( 0, frame_time - ( currTime - lastTime ) );
+            var id = window.setTimeout( function() { callback( currTime + timeToCall ); }, timeToCall );
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+    }
+
+    if ( !window.cancelAnimationFrame ) {
+        window.cancelAnimationFrame = function ( id ) { clearTimeout( id ); };
+    }
+
+};
+
+
+
 
 Number.prototype.fixed = function(n) { n = n || 3; return parseFloat(this.toFixed(n)); };
 GameCore.prototype.lerp = function(p, n, t) { var _t = Number(t); _t = (Math.max(0, Math.min(1, _t))).fixed(); return (p + _t * (n - p)).fixed(); };
@@ -66,10 +94,15 @@ function GameCore(gameRoom){
 
 		if(typeof(time) == "undefined"){
 			time = Date.now();
+			console.log("update time is undefined");
+		}
+		else{
+//			console.log("time: "+time);
 		}
 
 		if(this.lastFrameTime){
-			this.deltaTime = (time - this.lastFrameTime)/1000.0;
+			this.deltaTime = ((time - this.lastFrameTime)/1000.0).fixed();
+//			console.log(this.deltaTime);
 		}
 		else{
 			this.deltaTime = 0.016;
@@ -88,11 +121,13 @@ function GameCore(gameRoom){
 		}
 		
 		if(this.server){
-			this.animationFrame = setTimeout(this.Update.bind(this), frame_time);
+			this.animationFrame = setTimeout(this.Update.bind(this, Date.now()), frame_time);
 		}else{
-			this.animationFrame = window.setTimeout(this.Update.bind(this), frame_time);
-//			this.animationFrame = window.requestAnimationFrame(this.Update.bind(this), this.viewport);	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			
-		}			
+			this.animationFrame = window.requestAnimationFrame(this.Update.bind(this), this.viewport);
+/*				function(){
+					this.Update.bind(this, Date.now());
+				}, this.viewport);	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			*/
+		}
 	}
 
 	this.CreateTimer = function(){
@@ -618,8 +653,8 @@ function GameCore(gameRoom){
 
 				var newDir = this.ProcessInput(this.players[playerId], "serverUpdate");
 
-				playerPos.x = this.players[playerId].pos.x + newDir.x;
-				playerPos.y = this.players[playerId].pos.y + newDir.y;
+				playerPos.x = this.players[playerId].oldState.pos.x + newDir.x;
+				playerPos.y = this.players[playerId].oldState.pos.y + newDir.y;
 
 //				console.log("pos: "+playerPos.x.toFixed(3)+", "+playerPos.y.toFixed(3)+", Dir: "+newDir.x+", "+newDir.y);
 				this.players[playerId].inputs = [];
