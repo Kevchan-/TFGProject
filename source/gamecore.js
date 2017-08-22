@@ -147,11 +147,13 @@ function GameCore(gameRoom){
 	}
 
 	this.UpdatePhysics = function(){
-	    if(this.server) {
-	    	this.ServerUpdatePhysics();
-	    } else {
-	    	this.ClientUpdatePhysics();
-	    }
+		if(this.active){
+		    if(this.server) {
+		    	this.ServerUpdatePhysics();
+		    } else {
+		    	this.ClientUpdatePhysics();
+		    }
+		}
 	}
 
 	this.ClientUpdatePhysics = function(serverUpdate){
@@ -163,12 +165,17 @@ function GameCore(gameRoom){
 		}
 
 		if(this.clientPrediction){
+
 			this.selfPlayer.oldState.pos.x = this.selfPlayer.currentState.pos.x;
 			this.selfPlayer.oldState.pos.y = this.selfPlayer.currentState.pos.y;
 			var movement = this.ProcessInput(this.selfPlayer);
-//			console.log(message+"input: "+movement.x.toFixed(2)+", "+movement.y.toFixed(2));
+
 			this.selfPlayer.currentState.pos.x = this.selfPlayer.currentState.pos.x + movement.x;
 			this.selfPlayer.currentState.pos.y = this.selfPlayer.currentState.pos.y + movement.y;
+
+			if(this.selfPlayer.currentState.pos.x != this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y != this.selfPlayer.oldState.pos.y){
+				console.log("pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
+			}
 
 			this.selfPlayer.stateTime = this.localTime;
 		}else{
@@ -457,7 +464,6 @@ function GameCore(gameRoom){
 		}else{
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
-
 		}
 	}
 
@@ -484,27 +490,24 @@ function GameCore(gameRoom){
 //			console.log("cu/last server input index: "+myLastServerInput);
 
 			if(myLastServerInput){
-
 				var lastInputSeqIndex = -1;
 
 				for(var i = 0; i < this.selfPlayer.inputs.length; ++i){
 					if(this.selfPlayer.inputs[i].sequence == myLastServerInput){
+//						console.log("update time: "+latestUpdate["time"]+", pos: "+myServerPos.x+", "+myServerPos.y);
 						lastInputSeqIndex = i;
 						break;
 
-						console.log("cu/player sequence indexes: "+this.selfPlayer.inputs[i].sequence)
+//						console.log("cu/player sequence indexes: "+this.selfPlayer.inputs[i].sequence)
 					}
 				}
 
 //				console.log("cu/last index sequence index "+lastInputSeqIndex);
 
 				if(lastInputSeqIndex != -1){
+//					console.log("input time and pos: "+this.selfPlayer.inputs[lastInputSeqIndex].time+". Pos: "+this.selfPlayer.inputs[lastInputSeqIndex].pos.x+", "+this.selfPlayer.inputs[lastInputSeqIndex].pos.y);
 					var numberToClear = Math.abs(lastInputSeqIndex - (-1));
-//					console.log("lastInputSeqIndex: "+ lastInputSeqIndex);
 					this.selfPlayer.inputs.splice(0, numberToClear);
-	//				console.log("inputs af: "+this.selfPlayer.inputs.length);
-
-			//		console.log("server position: "+myServerPos.x.toFixed(2)+", "+myServerPos.y.toFixed(2))
 
 					this.selfPlayer.currentState.pos.x = myServerPos.x;
 					this.selfPlayer.currentState.pos.y = myServerPos.y;
@@ -621,12 +624,15 @@ function GameCore(gameRoom){
 							break;
 					}
 				}
+				console.log("input seq & time "+player.inputs[i].sequence+", "+player.inputs[i].time);
 			}
 		}
 
 //		console.log(message+"Dir: "+xDir+", "+yDir);
 
 		var	direction = this.MovementVectorFromDirection(xDir, yDir);
+
+//		console.log("movement "+direction.x+", "+direction.y);
 
 		if(player.inputs.length > 0){
 			player.lastInputSeq = player.inputs[player.inputs.length-1].sequence;	//last sequence on array
@@ -655,6 +661,13 @@ function GameCore(gameRoom){
 
 				playerPos.x = this.players[playerId].oldState.pos.x + newDir.x;
 				playerPos.y = this.players[playerId].oldState.pos.y + newDir.y;
+
+				if(playerOldPos.x != playerPos.x || playerOldPos.y != playerPos.y){
+					console.log("pos: "+playerPos.x+", "+playerPos.y);
+				}
+
+				this.recordPos = {	x: playerPos.x,
+									y: playerPos.y 	};
 
 //				console.log("pos: "+playerPos.x.toFixed(3)+", "+playerPos.y.toFixed(3)+", Dir: "+newDir.x+", "+newDir.y);
 				this.players[playerId].inputs = [];
@@ -685,13 +698,8 @@ function GameCore(gameRoom){
 				state[playerId+".pos"] = this.players[playerId].pos;
 				state[playerId+".inputSeq"] = this.players[playerId].lastInputSeq;
 
+			//	console.log("server time: "+this.serverTime+", pos: "+this.players[playerId].pos.x+", "+this.players[playerId].pos.y);
 //				console.log("last input sequence: "+state[playerId+".pos"].x+", "+state[playerId+".pos"].y);
-
-				if(typeof(this.players[playerId].pos) != 'undefined'){
-
-				}
-				else
-					console.log("STATE POS UNDEFINED");
 			}
 			else continue;
 		}
