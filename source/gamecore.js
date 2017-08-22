@@ -624,7 +624,12 @@ function GameCore(gameRoom){
 							break;
 					}
 				}
-				console.log("input seq & time "+player.inputs[i].sequence+", "+player.inputs[i].time);
+				if(message == 'cu'){
+					if(this.selfPlayer.id == player.id)
+						console.log("input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+				}else{
+					console.log("input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+				}
 			}
 		}
 
