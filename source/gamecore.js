@@ -174,7 +174,7 @@ function GameCore(gameRoom){
 			this.selfPlayer.currentState.pos.y = this.selfPlayer.currentState.pos.y + movement.y;
 
 			if(this.selfPlayer.currentState.pos.x != this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y != this.selfPlayer.oldState.pos.y){
-				console.log("pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
+				console.log("pu/ pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
 			}
 
 			this.selfPlayer.stateTime = this.localTime;
@@ -458,9 +458,10 @@ function GameCore(gameRoom){
 		}
 		if(this.clientPrediction){
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
-			var destination = this.v_lerp(this.selfPlayer.pos, this.selfPlayer.currentState.pos, this.clientSmooth*this.physicsDeltaTime);
-//			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
-			this.selfPlayer.SetPos(destination.x, destination.y); 
+//			var destination = this.v_lerp(this.selfPlayer.pos, this.selfPlayer.currentState.pos, this.clientSmooth*this.physicsDeltaTime);
+			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
+			console.log(message+" pos: "+this.selfPlayer.pos.x+", "+this.selfPlayer.pos.y);
+//			this.selfPlayer.SetPos(destination.x, destination.y); 
 		}else{
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
@@ -624,9 +625,9 @@ function GameCore(gameRoom){
 							break;
 					}
 				}
-				if(message == 'cu'){
+				if(message == 'cu/'){
 					if(this.selfPlayer.id == player.id)
-						console.log("input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+						console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 				}else{
 					console.log("input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 				}
