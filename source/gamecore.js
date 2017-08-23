@@ -174,7 +174,9 @@ function GameCore(gameRoom){
 			this.selfPlayer.currentState.pos.y = this.selfPlayer.currentState.pos.y + movement.y;
 
 			if(this.selfPlayer.currentState.pos.x != this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y != this.selfPlayer.oldState.pos.y){
-				console.log("pu/ pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
+				if(this.selfPlayer.currentState.pos.x < this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y < this.selfPlayer.oldState.pos.y){
+					console.log("pu/ pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
+				}
 			}
 
 			this.selfPlayer.stateTime = this.localTime;
@@ -347,6 +349,8 @@ function GameCore(gameRoom){
 				time 	: this.localTime.toFixed(3),
 				sequence: this.inputSequence
 			});
+
+			console.log("client input handler: "+this.selfPlayer.inputs);
 
 			var serverPacket = 'i.';
 			serverPacket += input.join('-')+'.';
@@ -537,6 +541,8 @@ function GameCore(gameRoom){
 		
 			var index = this.selfPlayer.id+".pos";
 			this.selfPlayer.SetPos(data[index].x, data[index].y);
+
+			console.log("naive approach");
 
 	//		console.log(data[this.selfPlayer.id+'.pos']);
 
