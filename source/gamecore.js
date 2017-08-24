@@ -636,7 +636,7 @@ function GameCore(gameRoom){
 						if(this.selfPlayer.id == player.id){
 							message = 'pu/ self input seq & time: ';
 						}else{
-							message = 'pu/ input seq & time: '
+							message = 'pu/ input seq & time of '+i+': ';
 						}
 
 /*						if(typeof(this.highestInputSeq) != 'undefined'){
@@ -652,7 +652,7 @@ function GameCore(gameRoom){
 						console.log(message+player.inputs[i].sequence+", "+player.inputs[i].time);
 //					}
 				}else{
-					console.log("input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+					console.log("input seq & time of "+i+": "+player.inputs[i].sequence+", "+player.inputs[i].time);
 				}
 			}
 		}
