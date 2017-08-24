@@ -630,18 +630,27 @@ function GameCore(gameRoom){
 					}
 				}
 				if(message == 'cu/'){
-					if(this.selfPlayer.id == player.id){
+//					if(this.selfPlayer.id == player.id){
 			//			console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+
+						if(this.selfPlayer.id == player.id){
+							message = 'pu/ self input seq & time: ';
+						}else{
+							message = 'pu/ input seq & time: '
+						}
+
 						if(typeof(this.highestInputSeq) != 'undefined'){
-							if(player.inputs[i].sequence < this.highestInputSeq){								
+							if(player.inputs[i].sequence < this.highestInputSeq){
+								console.log(message+player.inputs[i].sequence+", "+player.inputs[i].time);
+								this.highestInputSeq = player.inputs[i].sequence;
 								console.log("it happened");
 							}
 						}
 						if(player.inputs[i].sequence > this.highestInputSeq){
 							this.highestInputSeq = player.inputs[i].sequence;
 						}
-						console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
-					}
+						console.log(message+player.inputs[i].sequence+", "+player.inputs[i].time);
+//					}
 				}else{
 					console.log("input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 				}
