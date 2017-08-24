@@ -639,7 +639,7 @@ function GameCore(gameRoom){
 							message = 'pu/ input seq & time: '
 						}
 
-						if(typeof(this.highestInputSeq) != 'undefined'){
+/*						if(typeof(this.highestInputSeq) != 'undefined'){
 							if(player.inputs[i].sequence < this.highestInputSeq){
 								console.log(message+player.inputs[i].sequence+", "+player.inputs[i].time);
 								this.highestInputSeq = player.inputs[i].sequence;
@@ -648,7 +648,7 @@ function GameCore(gameRoom){
 						}
 						if(player.inputs[i].sequence > this.highestInputSeq){
 							this.highestInputSeq = player.inputs[i].sequence;
-						}
+						}*/
 						console.log(message+player.inputs[i].sequence+", "+player.inputs[i].time);
 //					}
 				}else{
