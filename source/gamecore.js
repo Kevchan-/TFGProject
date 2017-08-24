@@ -173,11 +173,11 @@ function GameCore(gameRoom){
 			this.selfPlayer.currentState.pos.x = this.selfPlayer.currentState.pos.x + movement.x;
 			this.selfPlayer.currentState.pos.y = this.selfPlayer.currentState.pos.y + movement.y;
 
-			if(this.selfPlayer.currentState.pos.x != this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y != this.selfPlayer.oldState.pos.y){
-				if(this.selfPlayer.currentState.pos.x < this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y < this.selfPlayer.oldState.pos.y){
+	//		if(this.selfPlayer.currentState.pos.x != this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y != this.selfPlayer.oldState.pos.y){
+	//			if(this.selfPlayer.currentState.pos.x < this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y < this.selfPlayer.oldState.pos.y){
 					console.log("pu/ pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
-				}
-			}
+	//			}
+	//		}
 
 			this.selfPlayer.stateTime = this.localTime;
 		}else{
@@ -350,7 +350,7 @@ function GameCore(gameRoom){
 				sequence: this.inputSequence
 			});
 
-			console.log("client input handler: "+this.selfPlayer.inputs);
+			console.log("client input handler: "+this.selfPlayer.inputs.length);
 
 			var serverPacket = 'i.';
 			serverPacket += input.join('-')+'.';
