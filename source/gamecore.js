@@ -525,8 +525,6 @@ function GameCore(gameRoom){
 				}				
 			}
 
-
-
 		}else{
 			return;
 		}
@@ -632,8 +630,16 @@ function GameCore(gameRoom){
 					}
 				}
 				if(message == 'cu/'){
-					if(this.selfPlayer.id == player.id)
-						console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+					if(this.selfPlayer.id == player.id){
+			//			console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+						if(typeof(this.highestInputSeq) != 'undefined'){
+							if(player.inputs[i].sequence < this.highestInputSeq){
+								console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+								console.log("it happened");
+							}
+						}
+						this.highestInputSeq = player.inputs[i].sequence;
+					}
 				}else{
 					console.log("input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 				}
