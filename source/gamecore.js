@@ -632,11 +632,11 @@ function GameCore(gameRoom){
 				if(message == 'cu/'){
 //					if(this.selfPlayer.id == player.id){
 			//			console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
-
+					var message2;
 						if(this.selfPlayer.id == player.id){
-							message = 'pu/ self input seq & time: ';
+							message2 = 'pu/ self input seq & time: ';
 						}else{
-							message = 'pu/ input seq & time of '+i+': ';
+							message2 = 'pu/ input seq & time of '+i+': ';
 						}
 
 /*						if(typeof(this.highestInputSeq) != 'undefined'){
@@ -649,7 +649,7 @@ function GameCore(gameRoom){
 						if(player.inputs[i].sequence > this.highestInputSeq){
 							this.highestInputSeq = player.inputs[i].sequence;
 						}*/
-						console.log(message+player.inputs[i].sequence+", "+player.inputs[i].time);
+						console.log(message2+player.inputs[i].sequence+", "+player.inputs[i].time);
 //					}
 				}else{
 					console.log("input seq & time of "+i+": "+player.inputs[i].sequence+", "+player.inputs[i].time);
