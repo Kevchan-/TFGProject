@@ -168,14 +168,18 @@ function GameCore(gameRoom){
 
 			this.selfPlayer.oldState.pos.x = this.selfPlayer.currentState.pos.x;
 			this.selfPlayer.oldState.pos.y = this.selfPlayer.currentState.pos.y;
-			var movement = this.ProcessInput(this.selfPlayer);
+			if(message == "cu/"){
+				var movement = this.ProcessInput(this.selfPlayer);
+				this.selfPlayer.currentState.pos.x = this.selfPlayer.oldState.pos.x + movement.x;
+				this.selfPlayer.currentState.pos.y = this.selfPlayer.oldState.pos.y + movement.y;
+			}
+			else{
 
-			this.selfPlayer.currentState.pos.x = this.selfPlayer.currentState.pos.x + movement.x;
-			this.selfPlayer.currentState.pos.y = this.selfPlayer.currentState.pos.y + movement.y;
-
+			}
 			if(this.selfPlayer.currentState.pos.x != this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y != this.selfPlayer.oldState.pos.y){
 	//			if(this.selfPlayer.currentState.pos.x < this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y < this.selfPlayer.oldState.pos.y){
 					console.log("pu/ pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
+//					console.log("pu/ mov: "+movement.x+", "+movement.y);
 	//			}
 			}
 
@@ -503,7 +507,6 @@ function GameCore(gameRoom){
 //						console.log("update time: "+latestUpdate["time"]+", pos: "+myServerPos.x+", "+myServerPos.y);
 						lastInputSeqIndex = i;
 						break;
-
 //						console.log("cu/player sequence indexes: "+this.selfPlayer.inputs[i].sequence)
 					}
 				}
@@ -600,10 +603,11 @@ function GameCore(gameRoom){
 
 		var xDir = 0;
 		var yDir = 0;
+		var il = player.inputs.length;
 
 		if(player.inputs.length > 0){
 
-			for(var i = 0; i < player.inputs.length; ++i){
+			for(var i = 0; i < il; ++i){
 
 				if(message == "cu/"){
 				//	console.log(message+"inputs "+i+": "+player.inputs[i].inputs);
@@ -635,8 +639,8 @@ function GameCore(gameRoom){
 			//			console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 					var message2;
 					var err = new Error("pu/ call stack"); 	 
-				    Error.stackTraceLimit = 3;
-				    console.log(err.stack);
+				    Error.stackTraceLimit = 4;
+//				    console.log(err.stack);
 
 //					console.log("pu/ caller:"+arguments.callee.caller.toString());
 						if(this.selfPlayer.id == player.id){
@@ -645,20 +649,10 @@ function GameCore(gameRoom){
 							message2 = 'pu/ input time & seq of '+i+': ';
 						}
 
-/*						if(typeof(this.highestInputSeq) != 'undefined'){
-							if(player.inputs[i].sequence < this.highestInputSeq){
-								console.log(message+player.inputs[i].sequence+", "+player.inputs[i].time);
-								this.highestInputSeq = player.inputs[i].sequence;
-								console.log("it happened");
-							}
-						}
-						if(player.inputs[i].sequence > this.highestInputSeq){
-							this.highestInputSeq = player.inputs[i].sequence;
-						}*/
 						console.log(message2+player.inputs[i].time+", "+player.inputs[i].sequence);
 //					}
 				}else{
-					console.log("input seq & time of "+i+": "+player.inputs[i].sequence+", "+player.inputs[i].time);
+					console.log("input time & seq: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 				}
 			}
 		}
@@ -669,12 +663,12 @@ function GameCore(gameRoom){
 
 //		console.log("movement "+direction.x+", "+direction.y);
 
-		if(player.inputs.length > 0){
-			player.lastInputSeq = player.inputs[player.inputs.length-1].sequence;	//last sequence on array
+		if(il > 0){
+			player.lastInputSeq = player.inputs[il-1].sequence;	//last sequence on array
 			if(message == "su/"){
 //				console.log(message+" last input seq "+player.inputs[player.inputs.length-1].sequence);
 			}
-			player.lastInputTime = player.inputs[player.inputs.length-1].time;	//time of the last sequence
+			player.lastInputTime = player.inputs[il-1].time;	//time of the last sequence
 		}
 		return (direction);
 	}
