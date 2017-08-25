@@ -350,7 +350,7 @@ function GameCore(gameRoom){
 				sequence: this.inputSequence
 			});
 
-			console.log("client input handler: "+this.selfPlayer.inputs.length);
+			console.log("cu/ "+this.selfPlayer.inputs.length+" inputs on client array");
 
 			var serverPacket = 'i.';
 			serverPacket += input.join('-')+'.';
@@ -634,10 +634,15 @@ function GameCore(gameRoom){
 //					if(this.selfPlayer.id == player.id){
 			//			console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 					var message2;
+					var err = new Error("pu/ call stack"); 	 
+				    Error.stackTraceLimit = 3;
+				    console.log(err.stack);
+
+//					console.log("pu/ caller:"+arguments.callee.caller.toString());
 						if(this.selfPlayer.id == player.id){
-							message2 = 'pu/ self input seq & time: ';
+							message2 = 'pu/ self input time & seq: ';
 						}else{
-							message2 = 'pu/ input seq & time of '+i+': ';
+							message2 = 'pu/ input time & seq of '+i+': ';
 						}
 
 /*						if(typeof(this.highestInputSeq) != 'undefined'){
@@ -650,7 +655,7 @@ function GameCore(gameRoom){
 						if(player.inputs[i].sequence > this.highestInputSeq){
 							this.highestInputSeq = player.inputs[i].sequence;
 						}*/
-						console.log(message2+player.inputs[i].sequence+", "+player.inputs[i].time);
+						console.log(message2+player.inputs[i].time+", "+player.inputs[i].sequence);
 //					}
 				}else{
 					console.log("input seq & time of "+i+": "+player.inputs[i].sequence+", "+player.inputs[i].time);
