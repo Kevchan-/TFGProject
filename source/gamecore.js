@@ -468,7 +468,7 @@ function GameCore(gameRoom){
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 //			var destination = this.v_lerp(this.selfPlayer.pos, this.selfPlayer.currentState.pos, this.clientSmooth*this.physicsDeltaTime);
 			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
-			if(this.selfPlayer.oldState.pos.x != this.selfPlayer.currentState.pos.x || this.selfPlayer.oldState.pos.y != this.selfPlayer.currentState.pos.y)
+//			if(this.selfPlayer.oldState.pos.x != this.selfPlayer.currentState.pos.x || this.selfPlayer.oldState.pos.y != this.selfPlayer.currentState.pos.y)
 				console.log(message+" pos: "+this.selfPlayer.pos.x+", "+this.selfPlayer.pos.y);
 //			this.selfPlayer.SetPos(destination.x, destination.y); 
 		}else{
