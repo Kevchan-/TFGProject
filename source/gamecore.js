@@ -520,6 +520,7 @@ function GameCore(gameRoom){
 
 					this.selfPlayer.currentState.pos.x = myServerPos.x;
 					this.selfPlayer.currentState.pos.y = myServerPos.y;
+					console.log("su/ net prediction - currentState changed to: "+myServerPos.x+", "+myServerPos.y);
 					this.selfPlayer.lastInputSeq = lastInputSeqIndex;
 
 					this.ClientUpdatePhysics("serverUpdate");
