@@ -425,7 +425,7 @@ function GameCore(gameRoom){
 
 							if (playerId != this.selfPlayer.id) {//updating only others
 //								console.log(playerId);
-//								console.log(this.selfPlayer.id);
+//								console.log(this.selfPlayer.id);					
 								var serverPos 	= latestServerUpdate[playerId+".pos"];
 								var targetPos 	= target[playerId+".pos"];
 								var pastPos 	= previous[playerId+".pos"];
@@ -435,6 +435,9 @@ function GameCore(gameRoom){
 									var otherPosition = this.v_lerp(pastPos, targetPos, timePoint);
 									var finalOtherPosition = this.v_lerp(this.players[playerId].pos, otherPosition, this.physicsDeltaTime*this.clientSmooth);
 								//	console.log("Player "+playerId+" position: "+finalOtherPosition.x+", "+finalOtherPosition.y);
+									if(this.players[playerId].pos.x != finalOtherPosition.x || this.players[playerId].pos.y != finalOtherPosition.y){
+										console.log("Updating others position");
+									}
 									this.players[playerId].SetPos(finalOtherPosition.x, finalOtherPosition.y);									
 								}
 							}
