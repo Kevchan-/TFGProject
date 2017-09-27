@@ -116,6 +116,8 @@ function GameCore(gameRoom){
 			else{
 //				console.log("Client update");
 				this.ClientUpdate();
+				this.PrintDebugData();
+
 				Render();
 			}
 		}
@@ -128,6 +130,17 @@ function GameCore(gameRoom){
 					this.Update.bind(this, Date.now());
 				}, this.viewport);	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			*/
 		}
+	}
+
+	this.PrintDebugData = function(){
+		renderer.getContext("2d").clearRect(0, 0, 252, 144);
+		renderer.getContext("2d").fillText("fps: "+this.fpsAverage,10,10);
+		renderer.getContext("2d").fillText("localTime: "+this.localTime,10,30);
+		renderer.getContext("2d").fillText("netPing: "+this.netPing,10,50);
+		renderer.getContext("2d").fillText("clientTime: "+this.clientTime,10,70);
+		renderer.getContext("2d").fillText("serverTime: "+this.serverTime,10,90);
+		renderer.getContext("2d").fillStyle="#FF0000";
+		renderer.getContext("2d").fillRect(100, 50, 1, 1);
 	}
 
 	this.CreateTimer = function(){
@@ -332,15 +345,15 @@ function GameCore(gameRoom){
 			xDir = -1;
 			input.push('l');
 		}
-		if(this.keyboard.pressed('D')||this.keyboard.pressed('right')){
+		else if(this.keyboard.pressed('D')||this.keyboard.pressed('right')){
 			xDir = 1;
 			input.push('r');
 		}
-		if(this.keyboard.pressed('S')||this.keyboard.pressed('down')){
+		else if(this.keyboard.pressed('S')||this.keyboard.pressed('down')){
 			yDir = -1;
 			input.push('d');
 		}				
-		if(this.keyboard.pressed('W')||this.keyboard.pressed('up')){
+		else if(this.keyboard.pressed('W')||this.keyboard.pressed('up')){
 			yDir = 1;
 			input.push('u');
 		}
@@ -458,6 +471,7 @@ function GameCore(gameRoom){
 	}
 
 	this.ClientUpdateLocalPosition = function(serverUpdate){
+//		renderer.fillText("caca",10,10);
 		var message = "";
 		if(typeof(serverUpdate) != "undefined"){
 			message = "su/";
@@ -468,7 +482,7 @@ function GameCore(gameRoom){
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 //			var destination = this.v_lerp(this.selfPlayer.pos, this.selfPlayer.currentState.pos, this.clientSmooth*this.physicsDeltaTime);
 			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
-//			if(this.selfPlayer.oldState.pos.x != this.selfPlayer.currentState.pos.x || this.selfPlayer.oldState.pos.y != this.selfPlayer.currentState.pos.y)
+			if(this.selfPlayer.oldState.pos.x != this.selfPlayer.currentState.pos.x || this.selfPlayer.oldState.pos.y != this.selfPlayer.currentState.pos.y)
 				console.log(message+" pos: "+this.selfPlayer.pos.x+", "+this.selfPlayer.pos.y);
 //			this.selfPlayer.SetPos(destination.x, destination.y); 
 		}else{
@@ -478,19 +492,24 @@ function GameCore(gameRoom){
 	}
 
 	this.ClientRefreshFPS = function(){
+		if(typeof(this.fpsAverageCounter) == 'undefined'){
+			this.fpsAverageCounter = 10;
+		}
+
 		//updates the fps every 10 frames by calculating the average
 		this.fps = 1/this.deltaTime;
-		this.fpsAverageAccumulator += this.fps
+		this.fpsAverageAccumulator += this.fps;
 		this.fpsAverageCounter++;
 
 		if(this.fpsAverageCounter >= 10){
 			this.fpsAverage = this.fpsAverageAccumulator/10;
+
 			this.fpsAverageCounter = 1;
 			this.fpsAverageAccumulator = this.fps;
 		}
 	}
 
-	//we correct the net position data of ourselves using client prediction
+	//we correct the position we predicted by snapping to the net position
 	this.ClientNetPredictionCorrection = function(){
 		if(this.serverUpdates.length > 0){
 			var latestUpdate = this.serverUpdates[this.serverUpdates.length-1];
@@ -520,7 +539,7 @@ function GameCore(gameRoom){
 
 					this.selfPlayer.currentState.pos.x = myServerPos.x;
 					this.selfPlayer.currentState.pos.y = myServerPos.y;
-					console.log("su/ net prediction - currentState changed to: "+myServerPos.x+", "+myServerPos.y);
+					console.log("su/ net prediction - new currentState pos: "+myServerPos.x+", "+myServerPos.y+", input seq "+ latestUpdate[this.selfPlayer.id+".inputSeq"]+"- on "+latestUpdate['time']+"s");
 					this.selfPlayer.lastInputSeq = lastInputSeqIndex;
 
 					this.ClientUpdatePhysics("serverUpdate");
@@ -639,9 +658,9 @@ function GameCore(gameRoom){
 //					if(this.selfPlayer.id == player.id){
 			//			console.log("pu/ input seq & time: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 					var message2;
-					var err = new Error("pu/ call stack"); 	 
+/*					var err = new Error("pu/ call stack"); 	 
 				    Error.stackTraceLimit = 4;
-//				    console.log(err.stack);
+				    console.log(err.stack);*/
 
 //					console.log("pu/ caller:"+arguments.callee.caller.toString());
 						if(this.selfPlayer.id == player.id){
@@ -796,7 +815,7 @@ function GameCore(gameRoom){
 	this.localTime = 0.016; 
 	this.localDeltaTime = new Date().getTime();
 	this.previousLocalDeltaTime = new Date().getTime();
-
+	this.fpsAverage = 30;
 
 	this.CreatePhysicsSimulation();
 	this.CreateTimer();

@@ -37,7 +37,7 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 		this.pos.y = y;
 		if(typeof(this.model.position) != "undefined" ){
 			this.model.position.x = this.pos.x;
-			this.model.position.y = this.pos.y;
+			this.model.position.z = this.pos.y;
 		}else{
 			console.log("no model loaded");
 		}
