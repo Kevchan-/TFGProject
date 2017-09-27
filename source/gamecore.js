@@ -382,6 +382,7 @@ function GameCore(gameRoom){
 
 	this.ClientProcessNetUpdates = function(){
 		if(this.serverUpdates.length > 0){
+			console.log("Updating others position");
 			var currentTime = this.clientTime;
 			var target = null;
 			var previous = null;
