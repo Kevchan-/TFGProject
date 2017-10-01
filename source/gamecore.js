@@ -437,7 +437,7 @@ function GameCore(gameRoom){
 									var finalOtherPosition = this.v_lerp(this.players[playerId].pos, otherPosition, this.physicsDeltaTime*this.clientSmooth);
 								//	console.log("Player "+playerId+" position: "+finalOtherPosition.x+", "+finalOtherPosition.y);
 									if(this.players[playerId].pos.x != finalOtherPosition.x || this.players[playerId].pos.y != finalOtherPosition.y){
-									//	console.log("Updating others position");
+										console.log("Updating others position: "+ finalOtherPosition.x+", "+finalOtherPosition.y);
 									}
 									this.players[playerId].SetPos(finalOtherPosition.x, finalOtherPosition.y);									
 								}
