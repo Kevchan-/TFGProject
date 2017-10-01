@@ -21,7 +21,6 @@ app.get('/', function(request, response){
 		var file = request.params[0];
 		console.log('Express :: file requested : '+file);
 	}*/
-
 	response.render('pages/index');
 });
 
