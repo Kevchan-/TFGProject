@@ -16,17 +16,18 @@ only makes sense if the orthographic camera is used for rendering to a texture,
 
 var scene = new THREE.Scene();
 var renderer = new THREE.CanvasRenderer();
-var modelLoader = new THREE.OBJLoader();
+//var modelLoader = new THREE.OBJLoader();
+renderer.setClearColor (0xffffff, 1);
 
 
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
-renderer.getContext('2d').font = "12px Arial";
+//renderer.getContext('2d').font = "12px Arial";
 
 var aspect = window.innerWidth / window.innerHeight;
-var d = 20;
+var d = 10;
 camera = new THREE.OrthographicCamera( - d * aspect, d * aspect, d, - d, 1, 1000 );
-camera.position.set( -20, -20, 20 ); // all components equal
+camera.position.set( 20, 20, 20 ); // all components equal
 camera.lookAt( scene.position ); // or the origin
 
 
@@ -38,55 +39,95 @@ camera.lookAt( scene.position ); // or the origin
 var models = [];
 var arrow = {};
 
-function Model(meshes, name, color){
-	this.meshes = [];
+function Model(mesh, name, color, mixer){
+	this.mesh = mesh;
 	this.name = name;
 	this.color = color;
+	this.mixer = mixer;
 }
+var geometry = new THREE.PlaneBufferGeometry( 1000, 1000 );
+plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { visible: true } ) );
+scene.add( plane );
 
-var basicMaterial = new THREE.MeshBasicMaterial( { color: 'blue' } );
+var basicMaterial = new THREE.MeshLambertMaterial( { color: 0x99ff00  } );
+//basicMaterial.overdraw = 0.5;
+var directionalLight =  new THREE.PointLight( 0xff0000 );
+var lightHelper = new THREE.PointLightHelper(directionalLight, 0.1);
 
-/*
-// controls
-var controls = new THREE.OrbitControls( camera, renderer.domElement );
-controls.addEventListener( 'change', Render );
-controls.enableZoom = false;
-controls.enablePan = false;
-controls.maxPolarAngle = Math.PI / 2;
-
-
-// grid
-var geometry = new THREE.PlaneBufferGeometry( 100, 100, 10, 10 );
-var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
-var grid = new THREE.Mesh( geometry, material );
-grid.rotation.order = 'YXZ';
-grid.rotation.y = - Math.PI / 2;
-grid.rotation.x = - Math.PI / 2;
-scene.add( grid );
-*/
+//light.position.set( 50, 50, 50 );
+var ambientLight = new THREE.AmbientLight( 0x606060); // soft white light
+scene.add(ambientLight);
+scene.add(directionalLight);
+scene.add(lightHelper);
 
 //axes
-scene.add(new THREE.AxisHelper( 40 ) );
+var axes = new THREE.AxisHelper(50);
+//axes.position.set(0, 0, 0)
+scene.add(axes);
 
-function Render() {
+var gridXZ = new THREE.GridHelper(100, 100, 0x888888, 0x888888);
+//gridXZ.setColors( new THREE.Color(0xFFC0CB), new THREE.Color(0x8f8f8f) );
+gridXZ.position.set(0,0,0 );
+scene.add(gridXZ);
+
+var modelLoader = new THREE.ObjectLoader();
+
+function Render(deltaTime) {
 	renderer.render( scene, camera );
+	for(i = 0; i < models.length; i++){
+		if(typeof(models[i].mixer) != 'undefined')
+			models[i].mixer.update(deltaTime);
+		else{
+			console.log("beh");
+		}
+	}
+//	if(mixer)
+//		mixer.update(deltaTime);
+//	THREE.AnimationHandler.update(delta);
+}
+
+function SetAnimation(model){
 }
 
 function AddModel(path, name, requester, color){	//gets passed a name and optionally color. requester is the player who called and is needed for the asynchronous function to pass them the node
 	//create model in the model array and add meshes to scene
 
-	modelLoader.load(path, function(object){
-		object.name = name;
-		models.push(new Model({object}, name, color));
-		console.log(models[0].name);
+	modelLoader.load(path, function(model, materials){
+		model.name = name;
+		scene.add(model);
 
-		object.traverse( function ( child ) {	//this sets the material
+		var newMixer = new THREE.AnimationMixer(model);
+
+		models.push(new Model(model, name, color, newMixer));
+//		models[models.length-1].mixer.clipAction(model.animations[0]).play();
+
+		model.traverse( function ( child ) {	//this sets the material
 	        if ( child instanceof THREE.Mesh ) {
-	            child.material = basicMaterial;
+	        	if(typeof(materials) == 'undefined'){
+		            child.material = basicMaterial;
+	        	}else{
+	        		child.material = materials[0];
+	        	}
 	        }
 	    });
-	    object.scale.set(1, 1, 1);
-		requester.model = object;	//passing the model to the player who requested it
-		scene.add(object);
+	    model.scale.set(1, 1, 1);
+		requester.model = models[models.length-1];	//passing the model to the player who requested it
+	}, function(xmlrequest){}, function(){
+		console.log("Error loading");
 	});
+
+}
+
+function MakeSquare(x, y){
+	var geometry = new THREE.PlaneBufferGeometry(0.9, 0.9);
+	var material = new THREE.MeshBasicMaterial({color: 0x000000});
+	var plane = new THREE.Mesh(geometry, material);
+	plane.rotation.x = THREE.Math.degToRad(270);
+	scene.add(plane);
+	plane.position.x = x;
+	plane.position.z = y;
+	plane.position.y = 0;
+
+	models.push(new Model(plane, "matrix"));
+	return(models[models.length-1]);
 }

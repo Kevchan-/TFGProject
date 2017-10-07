@@ -29,7 +29,6 @@ else
     if ( !window.cancelAnimationFrame ) {
         window.cancelAnimationFrame = function ( id ) { clearTimeout( id ); };
     }
-
 };
 
 
@@ -49,6 +48,8 @@ function GameCore(gameRoom){
 	this.host = {}; //serverside only, if not the first player added from the browser will be "selfPlayer". host is also in the vector, unlike selfPlayer
 	this.selfPlayer = {};	//clientside only, if not called from the client then the first player added from the server will be in the vector
 	this.playerCount = 0;
+	this.matrix = [];
+
 	this.active = false;	//when game starts this turns true
 
 	this.world = {
@@ -58,12 +59,21 @@ function GameCore(gameRoom){
 
 	if(this.room){
 		this.server = true;	//if there's no room as argument it's bc its not the server
+	}	
+
+	for(var i=0; i<9; i++) {
+	    this.matrix[i] = new Array(9);
+	    for(var j = 0; j < 9; j++){
+	    	if(!this.server){
+	    //		this.matrix[i][j] = MakeSquare(i, j);
+	    	}
+	    }
 	}
 	console.log("Server: "+this.server);
 
 	this.ClientCreateConfiguration = function(){
 		this.naiveApproach = false;
-		this.clientPrediction 	= true;
+		this.clientPrediction 	= false;
 		this.inputSequence 		= 0;
 		this.clientSmoothing 	= true;
 		this.clientSmooth 		= 25;
@@ -118,7 +128,7 @@ function GameCore(gameRoom){
 				this.ClientUpdate();
 				this.PrintDebugData();
 
-				Render();
+				Render(this.deltaTime);
 			}
 		}
 		
@@ -133,14 +143,14 @@ function GameCore(gameRoom){
 	}
 
 	this.PrintDebugData = function(){
-		renderer.getContext("2d").clearRect(0, 0, 252, 144);
+/*		renderer.getContext("2d").clearRect(0, 0, 252, 144);
 		renderer.getContext("2d").fillText("fps: "+this.fpsAverage,10,10);
 		renderer.getContext("2d").fillText("localTime: "+this.localTime,10,30);
 		renderer.getContext("2d").fillText("netPing: "+this.netPing,10,50);
 		renderer.getContext("2d").fillText("clientTime: "+this.clientTime,10,70);
 		renderer.getContext("2d").fillText("serverTime: "+this.serverTime,10,90);
 		renderer.getContext("2d").fillStyle="#FF0000";
-		renderer.getContext("2d").fillRect(100, 50, 1, 1);
+		renderer.getContext("2d").fillRect(100, 50, 1, 1);*/
 	}
 
 	this.CreateTimer = function(){
@@ -382,7 +392,6 @@ function GameCore(gameRoom){
 
 	this.ClientProcessNetUpdates = function(){
 		if(this.serverUpdates.length > 0){
-			console.log("Updating others position");
 			var currentTime = this.clientTime;
 			var target = null;
 			var previous = null;
@@ -432,14 +441,15 @@ function GameCore(gameRoom){
 								var pastPos 	= previous[playerId+".pos"];
 
 								if(typeof(pastPos) != 'undefined' && typeof(targetPos) != 'undefined'){
+						//			console.log("Updating others position: "+previous[playerId+".pos"].x+", "+previous[playerId+".pos"].y);
 //									console.log("pastpos of "+playerId+": "+previous[playerId+".pos"]);
 									var otherPosition = this.v_lerp(pastPos, targetPos, timePoint);
 									var finalOtherPosition = this.v_lerp(this.players[playerId].pos, otherPosition, this.physicsDeltaTime*this.clientSmooth);
 								//	console.log("Player "+playerId+" position: "+finalOtherPosition.x+", "+finalOtherPosition.y);
-									if(this.players[playerId].pos.x != finalOtherPosition.x || this.players[playerId].pos.y != finalOtherPosition.y){
-										console.log("Updating others position: "+ finalOtherPosition.x+", "+finalOtherPosition.y);
-									}
-									this.players[playerId].SetPos(finalOtherPosition.x, finalOtherPosition.y);									
+			//						if(this.players[playerId].pos.x != finalOtherPosition.x || this.players[playerId].pos.y != finalOtherPosition.y){
+						//				console.log("Updating others position: "+ finalOtherPosition.x+", "+finalOtherPosition.y);
+			//						}
+									this.players[playerId].SetPos(finalOtherPosition.x, finalOtherPosition.y, false);									
 								}
 							}
 						}else{
@@ -465,7 +475,7 @@ function GameCore(gameRoom){
 
 					if(this.clientSmoothing){
 						var finalPosition = this.v_lerp(this.selfPlayer.pos, localTarget, this.physicsDeltaTime*this.clientSmooth);
-						this.selfPlayer.SetPos(finalPosition.x, finalPosition.y);
+						this.selfPlayer.SetPos(finalPosition.x, finalPosition.y, true);
 					}
 				}else{
 //					console.log("2 is ok");
@@ -485,13 +495,13 @@ function GameCore(gameRoom){
 		if(this.clientPrediction){
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 //			var destination = this.v_lerp(this.selfPlayer.pos, this.selfPlayer.currentState.pos, this.clientSmooth*this.physicsDeltaTime);
-			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
+			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y, true); 
 			if(this.selfPlayer.oldState.pos.x != this.selfPlayer.currentState.pos.x || this.selfPlayer.oldState.pos.y != this.selfPlayer.currentState.pos.y)
 				console.log(message+" pos: "+this.selfPlayer.pos.x+", "+this.selfPlayer.pos.y);
 //			this.selfPlayer.SetPos(destination.x, destination.y); 
 		}else{
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
-			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y); 
+			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y, true); 
 		}
 	}
 
@@ -566,7 +576,7 @@ function GameCore(gameRoom){
 		if(this.naiveApproach){
 		
 			var index = this.selfPlayer.id+".pos";
-			this.selfPlayer.SetPos(data[index].x, data[index].y);
+			this.selfPlayer.SetPos(data[index].x, data[index].y, true);
 
 			console.log("naive approach");
 
@@ -576,7 +586,7 @@ function GameCore(gameRoom){
 				if(this.players.hasOwnProperty(playerId)){
 					index = playerId+".pos";
 	//				console.log("INDEX: "+index);
-					this.players[playerId].SetPos(data[index].x, data[index].y);
+					this.players[playerId].SetPos(data[index].x, data[index].y, false);
 				}
 				else continue;
 			}
