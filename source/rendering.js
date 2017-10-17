@@ -39,7 +39,8 @@ camera.lookAt( scene.position ); // or the origin
 var models = [];
 var arrow = {};
 
-function Model(mesh, name, color, mixer){
+function Model(index, mesh, name, color, mixer){
+	this.index = index;
 	this.mesh = mesh;
 	this.name = name;
 	this.color = color;
@@ -98,7 +99,7 @@ function AddModel(path, name, requester, color){	//gets passed a name and option
 
 		var newMixer = new THREE.AnimationMixer(model);
 
-		models.push(new Model(model, name, color, newMixer));
+		models.push(new Model(models.length, model, name, color, newMixer));
 //		models[models.length-1].mixer.clipAction(model.animations[0]).play();
 
 		model.traverse( function ( child ) {	//this sets the material
@@ -116,6 +117,11 @@ function AddModel(path, name, requester, color){	//gets passed a name and option
 		console.log("Error loading");
 	});
 
+}
+
+function DeleteModel(model){
+	models.splice(model.index, 1);
+	scene.remove(model.mesh);
 }
 
 function MakeSquare(x, y){

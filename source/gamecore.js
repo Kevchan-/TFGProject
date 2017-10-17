@@ -73,7 +73,7 @@ function GameCore(gameRoom){
 
 	this.ClientCreateConfiguration = function(){
 		this.naiveApproach = false;
-		this.clientPrediction 	= false;
+		this.clientPrediction 	= true;
 		this.inputSequence 		= 0;
 		this.clientSmoothing 	= true;
 		this.clientSmooth 		= 25;
@@ -136,9 +136,6 @@ function GameCore(gameRoom){
 			this.animationFrame = setTimeout(this.Update.bind(this, Date.now()), frame_time);
 		}else{
 			this.animationFrame = window.requestAnimationFrame(this.Update.bind(this), this.viewport);
-/*				function(){
-					this.Update.bind(this, Date.now());
-				}, this.viewport);	//next frame tell browser to render again, and when doing that execute this function, creating the gameloop			*/
 		}
 	}
 
@@ -201,7 +198,7 @@ function GameCore(gameRoom){
 			}
 			if(this.selfPlayer.currentState.pos.x != this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y != this.selfPlayer.oldState.pos.y){
 	//			if(this.selfPlayer.currentState.pos.x < this.selfPlayer.oldState.pos.x || this.selfPlayer.currentState.pos.y < this.selfPlayer.oldState.pos.y){
-					console.log("pu/ pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
+					//console.log("pu/ pos: "+this.selfPlayer.currentState.pos.x+", "+this.selfPlayer.currentState.pos.y);
 //					console.log("pu/ mov: "+movement.x+", "+movement.y);
 	//			}
 			}
@@ -320,7 +317,9 @@ function GameCore(gameRoom){
 		console.log("SOMEONE DISCONNECTED");
 		
 		//search for the player that disconnected in the 
+
 		if(this.players[id]){
+			this.players[id].DeleteModel();
 			delete this.players[id];
 		}
 		this.playerCount--;
@@ -377,7 +376,7 @@ function GameCore(gameRoom){
 				sequence: this.inputSequence
 			});
 
-			console.log("cu/ "+this.selfPlayer.inputs.length+" inputs on client array");
+//			console.log("cu/ "+this.selfPlayer.inputs.length+" inputs on client array");
 
 			var serverPacket = 'i.';
 			serverPacket += input.join('-')+'.';
@@ -465,7 +464,7 @@ function GameCore(gameRoom){
 				}*/
 
 				if(!this.clientPrediction && !this.naiveApproach){
-					console.log("using net only");
+					//console.log("using net only");
 
 					var myServerPosition = latestServerUpdate[this.selfPlayer.id+".pos"];
 					var myTargetPosition = target[this.selfPlayer.id+".pos"];
@@ -496,8 +495,8 @@ function GameCore(gameRoom){
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
 //			var destination = this.v_lerp(this.selfPlayer.pos, this.selfPlayer.currentState.pos, this.clientSmooth*this.physicsDeltaTime);
 			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y, true); 
-			if(this.selfPlayer.oldState.pos.x != this.selfPlayer.currentState.pos.x || this.selfPlayer.oldState.pos.y != this.selfPlayer.currentState.pos.y)
-				console.log(message+" pos: "+this.selfPlayer.pos.x+", "+this.selfPlayer.pos.y);
+			//if(this.selfPlayer.oldState.pos.x != this.selfPlayer.currentState.pos.x || this.selfPlayer.oldState.pos.y != this.selfPlayer.currentState.pos.y)
+				//console.log(message+" pos: "+this.selfPlayer.pos.x+", "+this.selfPlayer.pos.y);
 //			this.selfPlayer.SetPos(destination.x, destination.y); 
 		}else{
 			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
@@ -553,7 +552,7 @@ function GameCore(gameRoom){
 
 					this.selfPlayer.currentState.pos.x = myServerPos.x;
 					this.selfPlayer.currentState.pos.y = myServerPos.y;
-					console.log("su/ net prediction - new currentState pos: "+myServerPos.x+", "+myServerPos.y+", input seq "+ latestUpdate[this.selfPlayer.id+".inputSeq"]+"- on "+latestUpdate['time']+"s");
+					//console.log("su/ net prediction - new currentState pos: "+myServerPos.x+", "+myServerPos.y+", input seq "+ latestUpdate[this.selfPlayer.id+".inputSeq"]+"- on "+latestUpdate['time']+"s");
 					this.selfPlayer.lastInputSeq = lastInputSeqIndex;
 
 					this.ClientUpdatePhysics("serverUpdate");
@@ -622,8 +621,11 @@ function GameCore(gameRoom){
 
 	this.MovementVectorFromDirection = function(x, y){
 	    return {
-	        x : parseFloat((x * (this.playerSpeed * 0.015)).toFixed(3)),
-	        y : parseFloat((y * (this.playerSpeed * 0.015)).toFixed(3))
+//	        x : parseFloat((x * (this.playerSpeed * 0.015)).toFixed(3)),
+//	        y : parseFloat((y * (this.playerSpeed * 0.015)).toFixed(3))
+
+	        x : parseFloat((x * (this.playerSpeed * this.physicsDeltaTime)).toFixed(3)),
+	        y : parseFloat((y * (this.playerSpeed * this.physicsDeltaTime)).toFixed(3))	        
 	    };
 	}
 
@@ -683,10 +685,10 @@ function GameCore(gameRoom){
 							message2 = 'pu/ input time & seq of '+i+': ';
 						}
 
-						console.log(message2+player.inputs[i].time+", "+player.inputs[i].sequence);
+						//console.log(message2+player.inputs[i].time+", "+player.inputs[i].sequence);
 //					}
 				}else{
-					console.log("input time & seq: "+player.inputs[i].sequence+", "+player.inputs[i].time);
+					//console.log("input time & seq: "+player.inputs[i].sequence+", "+player.inputs[i].time);
 				}
 			}
 		}
@@ -726,7 +728,7 @@ function GameCore(gameRoom){
 				playerPos.y = this.players[playerId].oldState.pos.y + newDir.y;
 
 				if(playerOldPos.x != playerPos.x || playerOldPos.y != playerPos.y){
-					console.log("pos: "+playerPos.x+", "+playerPos.y);
+					//console.log("pos: "+playerPos.x+", "+playerPos.y);
 				}
 
 				this.recordPos = {	x: playerPos.x,

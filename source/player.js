@@ -50,7 +50,7 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 
 		this.pos.x = x;
 		this.pos.y = y;
-		if(typeof(this.model.mesh.position) != "undefined" ){
+		if(typeof(this.model.mesh) != "undefined" ){
 			this.model.mesh.position.x = this.pos.x;
 			this.model.mesh.position.z = -this.pos.y;
 		}else{
@@ -61,26 +61,28 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 
 	this.SetDir = function(previewX, previewY, x, y){
 		var moving = false;
-		if(x > previewX){
-			this.model.mesh.rotation.y = THREE.Math.degToRad(180);
-			moving = true;
-		}else if(x < previewX){
-			this.model.mesh.rotation.y = THREE.Math.degToRad(0);			
-			moving = true;
-		}else if(y > previewY){
-			this.model.mesh.rotation.y = THREE.Math.degToRad(270);
-			moving = true;
-		}else if(y < previewY){
-			this.model.mesh.rotation.y = THREE.Math.degToRad(90);
-			moving = true;
-		}
+		if(typeof(this.model.mesh) != "undefined" ){
+			if(x > previewX){
+				this.model.mesh.rotation.y = THREE.Math.degToRad(180);
+				moving = true;
+			}else if(x < previewX){
+				this.model.mesh.rotation.y = THREE.Math.degToRad(0);			
+				moving = true;
+			}else if(y > previewY){
+				this.model.mesh.rotation.y = THREE.Math.degToRad(270);
+				moving = true;
+			}else if(y < previewY){
+				this.model.mesh.rotation.y = THREE.Math.degToRad(90);
+				moving = true;
+			}
 
-		if(moving){
-			this.model.mixer.clipAction(this.model.mesh.animations[0]).play();
-	//		console.log("PLAYING ANIMATION");
-		}else{
-			this.model.mixer.clipAction(this.model.mesh.animations[0]).stop();
-	//		console.log("STOPPING ANIMATION");
+			if(moving){
+				this.model.mixer.clipAction(this.model.mesh.animations[0]).play();
+		//		console.log("PLAYING ANIMATION");
+			}else{
+				this.model.mixer.clipAction(this.model.mesh.animations[0]).stop();
+		//		console.log("STOPPING ANIMATION");
+			}
 		}
 	}
 
@@ -89,6 +91,11 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 		this.pos.y += y;
 		this.model.mesh.position.x = this.pos.x;
 		this.model.mesh.position.y = this.pos.y;
+	}
+
+	this.DeleteModel = function(){
+		console.log("model signaled to be deleted");
+		DeleteModel(this.model);
 	}
 
 }
