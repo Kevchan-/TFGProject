@@ -61,11 +61,11 @@ function GameCore(gameRoom){
 		this.server = true;	//if there's no room as argument it's bc its not the server
 	}	
 
-	for(var i=0; i<9; i++) {
-	    this.matrix[i] = new Array(9);
-	    for(var j = 0; j < 9; j++){
+	for(var i=0; i<20; i++) {
+	    this.matrix[i] = new Array(20);
+	    for(var j = 0; j < 20; j++){
 	    	if(!this.server){
-	    //		this.matrix[i][j] = MakeSquare(i, j);
+	    		this.matrix[i][j] = MakeSquare(i, j);
 	    	}
 	    }
 	}
@@ -73,7 +73,7 @@ function GameCore(gameRoom){
 
 	this.ClientCreateConfiguration = function(){
 		this.naiveApproach = false;
-		this.clientPrediction 	= true;
+		this.clientPrediction 	= false;
 		this.inputSequence 		= 0;
 		this.clientSmoothing 	= true;
 		this.clientSmooth 		= 25;
@@ -499,8 +499,8 @@ function GameCore(gameRoom){
 				//console.log(message+" pos: "+this.selfPlayer.pos.x+", "+this.selfPlayer.pos.y);
 //			this.selfPlayer.SetPos(destination.x, destination.y); 
 		}else{
-			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
-			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y, true); 
+//			var time = (this.localTime - this.selfPlayer.stateTime) / this.physicsDeltaTime;
+//			this.selfPlayer.SetPos(this.selfPlayer.currentState.pos.x, this.selfPlayer.currentState.pos.y, true); 
 		}
 	}
 
@@ -620,6 +620,9 @@ function GameCore(gameRoom){
 	}
 
 	this.MovementVectorFromDirection = function(x, y){
+
+			//console.log("Physics delta time"+this.physicsDeltaTime);
+
 	    return {
 //	        x : parseFloat((x * (this.playerSpeed * 0.015)).toFixed(3)),
 //	        y : parseFloat((y * (this.playerSpeed * 0.015)).toFixed(3))

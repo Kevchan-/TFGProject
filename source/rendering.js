@@ -33,7 +33,6 @@ camera.lookAt( scene.position ); // or the origin
 
 
 //var camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
-//var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 //camera.position.z = 5;
 
 var models = [];
@@ -46,9 +45,6 @@ function Model(index, mesh, name, color, mixer){
 	this.color = color;
 	this.mixer = mixer;
 }
-var geometry = new THREE.PlaneBufferGeometry( 1000, 1000 );
-plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { visible: true } ) );
-scene.add( plane );
 
 var basicMaterial = new THREE.MeshLambertMaterial( { color: 0x99ff00  } );
 //basicMaterial.overdraw = 0.5;
@@ -79,7 +75,7 @@ function Render(deltaTime) {
 		if(typeof(models[i].mixer) != 'undefined')
 			models[i].mixer.update(deltaTime);
 		else{
-			console.log("beh");
+//			console.log("beh");
 		}
 	}
 //	if(mixer)
@@ -124,10 +120,11 @@ function DeleteModel(model){
 	scene.remove(model.mesh);
 }
 
+var geometry = new THREE.PlaneBufferGeometry(0.9, 0.9);
+
+
 function MakeSquare(x, y){
-	var geometry = new THREE.PlaneBufferGeometry(0.9, 0.9);
-	var material = new THREE.MeshBasicMaterial({color: 0x000000});
-	var plane = new THREE.Mesh(geometry, material);
+	var plane = new THREE.Mesh(geometry, basicMaterial);
 	plane.rotation.x = THREE.Math.degToRad(270);
 	scene.add(plane);
 	plane.position.x = x;
