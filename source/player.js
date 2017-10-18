@@ -36,16 +36,16 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 	this.SetPos = function(x, y, isSelfPlayer){	//use this function to move every object on the client
 
 
-		if(!isSelfPlayer){
-			this.SetDir(this.pos.x, this.pos.y, x, y);
-		}
-		else{
-			if(this.pos.x == x && this.pos.y == y){
-				//console.log("POSITION NOT CHANGED");
-			}
-		}
+		// if(!isSelfPlayer){
+		// 	this.SetDir(this.pos.x, this.pos.y, x, y);
+		// }
+		// else{
+		// 	if(this.pos.x == x && this.pos.y == y){
+		// 		//console.log("POSITION NOT CHANGED");
+		// 	}
+		// }
 
-
+		this.SetDir(this.pos.x, this.pos.y, x, y);
 
 
 		this.pos.x = x;
@@ -94,7 +94,6 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 	}
 
 	this.DeleteModel = function(){
-		console.log("model signaled to be deleted");
 		DeleteModel(this.model);
 	}
 

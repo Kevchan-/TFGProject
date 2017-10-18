@@ -22,7 +22,7 @@ renderer.setClearColor (0xffffff, 1);
 
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
-//renderer.getContext('2d').font = "12px Arial";
+renderer.getContext('2d').font = "12px Arial";
 
 var aspect = window.innerWidth / window.innerHeight;
 var d = 10;
@@ -47,6 +47,7 @@ function Model(index, mesh, name, color, mixer){
 }
 
 var basicMaterial = new THREE.MeshLambertMaterial( { color: 0x99ff00  } );
+var planeMaterial = new THREE.MeshLambertMaterial( { color: 0xafceff  } );
 //basicMaterial.overdraw = 0.5;
 var directionalLight =  new THREE.PointLight( 0xff0000 );
 var lightHelper = new THREE.PointLightHelper(directionalLight, 0.1);
@@ -124,7 +125,7 @@ var geometry = new THREE.PlaneBufferGeometry(0.9, 0.9);
 
 
 function MakeSquare(x, y){
-	var plane = new THREE.Mesh(geometry, basicMaterial);
+	var plane = new THREE.Mesh(geometry, planeMaterial);
 	plane.rotation.x = THREE.Math.degToRad(270);
 	scene.add(plane);
 	plane.position.x = x;
