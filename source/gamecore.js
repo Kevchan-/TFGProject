@@ -48,7 +48,7 @@ function GameCore(gameRoom){
 	this.host = {}; //serverside only, if not the first player added from the browser will be "selfPlayer". host is also in the vector, unlike selfPlayer
 	this.selfPlayer = {};	//clientside only, if not called from the client then the first player added from the server will be in the vector
 	this.playerCount = 0;
-	this.matrix = [];
+	this.matrix = new Array(20);
 
 	this.active = false;	//when game starts this turns true
 

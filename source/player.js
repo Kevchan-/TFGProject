@@ -45,8 +45,7 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 		// 	}
 		// }
 
-		this.SetDir(this.pos.x, this.pos.y, x, y);
-
+		this.SetDir(this.pos.x, this.pos.y, x, y, isSelfPlayer);
 
 		this.pos.x = x;
 		this.pos.y = y;
@@ -59,7 +58,7 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 //		console.log("pos: "+this.pos.x+", "+this.pos.y);
 	}
 
-	this.SetDir = function(previewX, previewY, x, y){
+	this.SetDir = function(previewX, previewY, x, y, isSelfPlayer){
 		var moving = false;
 		if(typeof(this.model.mesh) != "undefined" ){
 			if(x > previewX){
@@ -77,11 +76,14 @@ function Player(gameCore, playerNet){	//playerNet is the net object that was ori
 			}
 
 			if(moving){
-				this.model.mixer.clipAction(this.model.mesh.animations[0]).play();
+//				this.model.mixer.clipAction(this.model.mesh.animations[0]).play();
+				this.model.mixer.clipAction(this.model.mesh.animations[0]).paused = false;
 		//		console.log("PLAYING ANIMATION");
 			}else{
-				this.model.mixer.clipAction(this.model.mesh.animations[0]).stop();
-		//		console.log("STOPPING ANIMATION");
+				this.model.mixer.clipAction(this.model.mesh.animations[0]).paused = true;
+//				this.model.mixer.clipAction(this.model.mesh.animations[0]).stop();
+				//if(isSelfPlayer)
+				//	console.log("STOPPING ANIMATION");
 			}
 		}
 	}

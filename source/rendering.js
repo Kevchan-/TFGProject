@@ -97,7 +97,8 @@ function AddModel(path, name, requester, color){	//gets passed a name and option
 		var newMixer = new THREE.AnimationMixer(model);
 
 		models.push(new Model(models.length, model, name, color, newMixer));
-//		models[models.length-1].mixer.clipAction(model.animations[0]).play();
+		models[models.length-1].mixer.clipAction(model.animations[0]).setDuration(0.5);
+		models[models.length-1].mixer.clipAction(model.animations[0]).play();
 
 		model.traverse( function ( child ) {	//this sets the material
 	        if ( child instanceof THREE.Mesh ) {

@@ -9,6 +9,10 @@ function GameRoom(client){
 	this.playerCount = 1; 		//there's only the host on creation
 	this.active = false;
 
+	this.teamColors = [0x99ff00, 0xff7f00];
+	this.team1 = [];
+	this.team2 = [];
+
 //	var newGame = gameCode(this);
 	this.game = new gameCode(this); //the game logic class
 	this.game.AddPlayer(client);
